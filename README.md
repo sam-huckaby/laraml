@@ -1,3 +1,5 @@
+![Screenshot from 2024-01-16 21-35-11](https://github.com/sam-huckaby/laraml/assets/5497597/a083fba7-a9c8-4ebe-8df5-5ac83984a52f)
+
 # Laraml
 I DON'T KNOW IF THIS NAME WILL STICK BUT IT'S THE ONLY NAME THAT SOUNDED OKAY THAT I COULD GET A DOMAIN FOR
 
@@ -16,6 +18,7 @@ If you want to configure a database, you will need to set the following values i
 - `DB_NAME` -> The name of the database
 - `DB_PASS` -> the password of the database user
 - `DB_USER` -> The username of the database user
+
 
 
 ### Step 2: Tailwind
