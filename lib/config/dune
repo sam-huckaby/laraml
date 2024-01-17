@@ -1,4 +1,4 @@
 (library
   (name config)
-  (libraries core dream lwt tyxml)
+  (libraries utils dream lwt tyxml)
   (preprocess (pps lwt_ppx)))

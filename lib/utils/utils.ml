@@ -79,3 +79,11 @@ let a_hx_typed name =
 
 (* Type safety? What's that? *)
 let a_hx name = Tyxml.Html.Unsafe.space_sep_attrib ("hx-" ^ name)
+
+(* Get either the value of an envrionment variable, or return the given default *)
+(* Mostly used in configs *)
+let env_or_default env_key default_value =
+  match Sys.getenv_opt env_key with
+  | Some value -> value 
+  | None -> default_value
+

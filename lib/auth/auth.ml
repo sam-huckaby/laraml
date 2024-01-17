@@ -2,6 +2,26 @@ open Lwt
 open Cohttp
 open Cohttp_lwt_unix
 
+(*********************************************************************************************)
+(*                                    Standard Middleware                                    *)
+(* This is the standard auth middleware that ships with Laraml. It is often enough for basic *)
+(* needs, and can be simply used without modification. There may be more advanced use cases  *)
+(* that require additional fine-grained control over how an authenticated user is classified *)
+(* which can be added either here, or as a ustom middleware elsewhere.                       *)
+(* @param {handler} next - The page handler to call after successful authentication. The     *)
+(*                         next page will only be served if the user is or becomes           *)
+(*                         authenticated.                                                    *)
+(* @param {request} request - The dream request object for the current HTTP request flow     *)
+(*********************************************************************************************)
+let auth_middleware next request =
+      (* Check for the existence of a BI access token - this will invalidate any previously logged in people with passwords *)
+      match Dream.session_field request "access_token" with
+      | None ->
+          (* Invalidate this session, to prevent session fixation attacks before sending them back to login *)
+          let%lwt () = Dream.invalidate_session request in 
+          Dream.redirect request ~code:302 "/login"
+      | Some _ ->
+          next request
 
 let create_identity display_name username email =
   let body = Cohttp_lwt.Body.of_string ("{\"identity\":{\"display_name\":\"" ^ display_name ^ "\",\"traits\": {\"type\": \"traits_v0\",\"username\": \"" ^ username ^ "\",\"primary_email_address\":\"" ^ email ^ "\"}}}") in 

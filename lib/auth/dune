@@ -1,0 +1,4 @@
+(library
+  (name auth)
+  (libraries utils cohttp cohttp-lwt-unix database dream lwt tyxml)
+  (preprocess (pps lwt_ppx)))

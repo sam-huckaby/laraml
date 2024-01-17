@@ -56,16 +56,3 @@ let auth_middleware next request =
 
 let () = Core.Bootstrap.launch ();
 
-  (*
-  Dotenv.export () |> ignore;
-
-  match Core.Database.check_connection_string () with
-  | true -> (
-    (* Not every app needs a DB - some may use headless CMS or just be static *)
-    (* Need to conditionally check if the environment variables are set and NOT attempt init if they are not *)
-    match Core.Database.init_database ~force_migrations:true (Uri.of_string @@ Core.Database.connection_string ()) with
-    | Error (`Msg err) -> Format.printf "Error: %s" err
-    | Ok () -> Core.Bootstrap.start_server ()
-  )
-  | false -> Core.Bootstrap.start_server ()
-  *)

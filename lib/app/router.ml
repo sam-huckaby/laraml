@@ -43,8 +43,17 @@ let feed_page request =
   ) |> Lwt.return
 *)
 let pages = [
+  (* A simple no authentication route *)
   Dream.scope "/" [(* Middleware goes here *)] [
     Dream.get "/" (fun request ->
+      let%lwt page = (hello_page request) in
+      Dream.html page
+    ) ;
+  ] ;
+
+  (* A simple authenticated route *)
+  Dream.scope "/" [Auth.auth_middleware] [
+    Dream.get "/dashboard" (fun request ->
       let%lwt page = (hello_page request) in
       Dream.html page
     ) ;
@@ -52,8 +61,11 @@ let pages = [
 ]
 
 let api = [
-  Dream.scope "/api" [(* Middleware goes here *)] [
-      Dream.post "/logout" (fun request ->
+  Dream.scope "/" [(* Middleware goes here *)] [
+    Dream.get "/ping" (fun _ ->
+      Lwt.return (Dream.response ~code:200 "Pong!")
+    ) ;
+    Dream.post "/logout" (fun request ->
       let%lwt () = Dream.invalidate_session request in 
       Lwt.return (Dream.response ~headers:[("HX-Redirect", "/")] ~code:200 "Logged out!")
     ) ;

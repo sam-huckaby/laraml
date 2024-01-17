@@ -19,8 +19,6 @@ let root page_title content =
       link ~rel:[`Stylesheet] ~href:"/static/build.css" () ;
       script ~a:[a_src (Xml.uri_of_string "/static/htmx.min.js")] (txt "") ;
       script ~a:[a_src (Xml.uri_of_string "/static/_hyperscript.min.js")] (txt "") ;
-      script ~a:[a_src (Xml.uri_of_string "/static/helpers.js")] (txt "") ;
-      script ~a:[a_src (Xml.uri_of_string "/static/namespace_bi.dist.js")] (txt "") ;
     ])
     (body ~a:[a_class [
       "min-h-full" ;

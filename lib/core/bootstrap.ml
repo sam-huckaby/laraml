@@ -32,14 +32,8 @@ let start_server () =
     (* Configure all the routes used by the app *)
     @@ Dream.router (
       [
-        Dream.scope "/" [] App.Router.pages ; (* TODO: We need to be able to define a large list of routes with maybe middleware/pages tuples? *)
-        Dream.scope "/" [] App.Router.api ;
-        (* TODO: Get routes from App Module
-        Dream.scope "/" [] no_auth_routes ;
-        Dream.scope "/" [] pages ;
-        Dream.scope "/" [auth_middleware] fragments ;
-        Dream.scope "/" [auth_middleware] actions ;
-        *)
+        Dream.scope "/" [] App.Router.pages ;
+        Dream.scope "/api" [] App.Router.api ;
 
         (* Serve any static content we may need, maybe stylesheets? *)
         (* This local_directory path is relative to the location the app is run from *)
