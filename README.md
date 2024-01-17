@@ -1,4 +1,4 @@
-![Screenshot from 2024-01-16 21-35-11](https://github.com/sam-huckaby/laraml/assets/5497597/a083fba7-a9c8-4ebe-8df5-5ac83984a52f)
+![Screenshot from 2024-01-17 11-51-19](https://github.com/sam-huckaby/laraml/assets/5497597/f489d173-eeda-499a-9aa1-6c7343f18334)
 
 # Laraml
 I DON'T KNOW IF THIS NAME WILL STICK BUT IT'S THE ONLY NAME THAT SOUNDED OKAY THAT I COULD GET A DOMAIN FOR
