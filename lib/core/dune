@@ -1,0 +1,4 @@
+(library
+  (name core)
+  (libraries app caqti caqti-driver-postgresql caqti-lwt cohttp cohttp-lwt-unix cryptokit dotenv dream lwt petrol tyxml yojson)
+  (preprocess (pps lwt_ppx)))

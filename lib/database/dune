@@ -1,0 +1,4 @@
+(library
+  (name database)
+  (libraries caqti caqti-driver-postgresql caqti-lwt lwt petrol cryptokit)
+  (preprocess (pps lwt_ppx)))
