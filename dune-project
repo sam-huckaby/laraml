@@ -5,22 +5,22 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github samhuckaby/laraml))
 
-(authors "Author Name")
+(authors "Sam Huckaby")
 
-(maintainers "Maintainer Name")
+(maintainers "Sam Huckaby")
 
-(license LICENSE)
+(license MIT)
 
-(documentation https://url/to/documentation)
+(documentation https://laraml.com)
 
 (package
  (name laraml)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "An opinionated OCaml web framework built on Dream")
+ (description "Laraml is a Laravel-esque web framework that is designed to help OCaml developers to build web apps rapidly so that OCaml can become a go-to rapid prototyping tool.")
  (depends ocaml dune)
  (tags
-  (topics "to describe" your project)))
+  (dream "web framework" SaaS rapid prototype)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
