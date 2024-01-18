@@ -23,6 +23,43 @@ let connections () = [
                         user = Utils.env_or_default "DB_USER" "postgres" ;
                         pass = Utils.env_or_default "DB_PASS" "" ;
                 } ;
-        }
+        } ;
+        {
+                name = "MySQL" ;
+                details = {
+                        driver = Utils.env_or_default "DB_DRIVER" "mysql" ;
+                        host = Utils.env_or_default "DB_HOST" "localhost" ;
+                        port = Utils.env_or_default "DB_PORT" "5432" ;
+                        name = Utils.env_or_default "DB_NAME" "laraml" ;
+                        user = Utils.env_or_default "DB_USER" "admin" ;
+                        pass = Utils.env_or_default "DB_PASS" "" ;
+                } ;
+        } ;
 ]
+
+(* Function to construct the connection string *)
+let construct_connection_string details =
+    Printf.sprintf "%s://%s:%s@%s:%s/%s"
+        details.driver
+        details.user
+        details.pass
+        details.host
+        details.port
+        details.name
+
+(* Modified function to find a connection by name and return its connection string *)
+let get_connection name =
+    let conns = connections () in
+    match List.find_opt (fun conn -> conn.name = name) conns with
+    | Some conn -> Some (construct_connection_string conn.details)
+    | None -> None
+
+(*
+let get_connection name =
+    let conns = connections () in
+    try 
+        Some (List.find (fun conn -> conn.name = name) conns).details
+    with
+    | Not_found -> None
+*)
 

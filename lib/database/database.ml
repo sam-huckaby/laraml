@@ -308,6 +308,11 @@ let get_posts next_id db =
   | Some id -> next_posts_page (Int64.of_string id) db
   | None -> fetch_posts db
 
+
+
+
+
+
 exception EnvVarNotFound of string
 
 let check_env_value var_name =
@@ -324,8 +329,6 @@ let db_driver () =
   match Sys.getenv_opt "DB_DRIVER" with
   | Some value -> value 
   | None -> "unset"
-
-
 
 let check_connection_string () =
   (* Important note: These will throw `Not_found if the variables are not set, preventing execution *)
@@ -349,11 +352,12 @@ let connection_string () =
   let pass = get_env_value "DB_PASS" in 
   driver ^ "://" ^ user ^ ":" ^ pass ^ "@" ^ host ^ ":" ^ port ^ "/" ^ name
 
-(* I borrowed this function from github:gopiandcode/ocamlot *)
-let init_database ?(force_migrations=false) path =
+(* Should there be multiple init functions? init_sqlite, init_postgresql, init_mysql, etc *)
+
+let init_database ?(force_migrations=false) conn_string =
   let initialise =
     let open Lwt_result.Syntax in
-    Caqti_lwt.with_connection path (fun conn ->
+    Caqti_lwt.with_connection conn_string (fun conn ->
       let* needs_migration =
         Petrol.VersionedSchema.migrations_needed schema conn in
       Format.printf "needs migration: %b\n@." needs_migration;
@@ -380,4 +384,39 @@ let init_database ?(force_migrations=false) path =
   | Error (#Caqti_error.t as err) ->
     Error (`Msg ("internal error: " ^ Caqti_error.show err))
   | Error (`Msg m) -> Error (`Msg m)
+
+let init_postgresql force_migrations =
+  match Config.Database.get_connection "PostgreSQL" with
+  | None -> Ok () (* If PostgreSQL isn't configured, that's okay *)
+  | Some conn_string -> (
+    let initialise =
+      let open Lwt_result.Syntax in
+      Caqti_lwt.with_connection (Uri.of_string conn_string) (fun conn ->
+        let* needs_migration =
+          Petrol.VersionedSchema.migrations_needed schema conn in
+        Format.printf "needs migration: %b\n@." needs_migration;
+        let* () =
+          if needs_migration && not force_migrations
+          then
+            Lwt_result.fail
+              (`Msg "migrations needed for local database - please \
+                     re-run with suitable flags (-m). (You probably also \
+                     want to backup your database file as well)")
+          else Lwt_result.return () in
+        Petrol.VersionedSchema.initialise schema conn
+      ) in
+    let version_to_string (ver: Petrol.VersionedSchema.version) =
+      String.concat "." (List.map string_of_int (ver :> int list)) in
+    match Lwt_main.run initialise with
+    | Ok () -> Ok ()
+    | Error (`Newer_version_than_supported version) ->
+      Error (`Msg
+               (
+                 "database uses newer version (" ^
+                 (version_to_string version) ^
+                 ") than supported"))
+    | Error (#Caqti_error.t as err) ->
+      Error (`Msg ("internal error: " ^ Caqti_error.show err))
+    | Error (`Msg m) -> Error (`Msg m)
+  )
 

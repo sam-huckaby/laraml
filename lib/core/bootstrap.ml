@@ -1,16 +1,24 @@
 (* Here we initialize and launch the app *)
 (* Everything that needs to happen at launch time must be kicked off from this file *)
 
-(* Run any DB migrations *)
-let init_database () = match Database.check_connection_string () with
-  | true -> (
-    (* Not every app needs a DB - some may use headless CMS or just be static *)
-    (* Need to conditionally check if the environment variables are set and NOT attempt init if they are not *)
-    match Database.init_database ~force_migrations:true (Uri.of_string @@ Database.connection_string ()) with
-    | Error (`Msg err) -> Some (Format.sprintf "Error: %s" err)
-    | Ok () -> None
-  )
-  | false -> None
+(* Initialize DB connection and optionally Run any migrations *)
+let init_databases force_migrations =
+  let results = [
+    ("PostgreSQL", Database.init_postgresql force_migrations) ;
+    (* ("SQLite", Database.init_sqlite force_migrations) ; *)
+    (* ("MySQL", Database.init_mysql force_migrations) ; *)
+  ] in
+  List.fold_left (fun acc (db_name, init_func) ->
+    match acc with
+    | Some _ -> acc  (* If an error already occurred, skip further initializations *)
+    | None ->
+      match Config.Database.get_connection db_name with
+      | Some _ ->
+        (match init_func with
+        | Error (`Msg err) -> Some (Format.sprintf "Error initializing %s: %s" db_name err)
+        | Ok () -> None)
+      | None -> None  (* Skip initialization if environment variables are not set *)
+  ) None results
 
 (* Start Dream *)
 let start_server () =
@@ -48,7 +56,7 @@ let launch () =
   (* Load environment variables into memory *)
   Dotenv.export () |> ignore;
   (* Confirm that the database is configured or not used *)
-  match init_database () with
+  match init_databases true with
   | Some err -> Format.printf "Error: %s" err
   | None -> start_server ();
 
