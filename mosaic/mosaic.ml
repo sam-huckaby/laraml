@@ -1,3 +1,4 @@
+(*open Unix*)
 open Riot
 
 type Message.t += Usage_info
@@ -5,37 +6,45 @@ type Message.t += Usage_info
 type Message.t += Init of string
 type Message.t += Add
 (* Should I namespace sub-commands underneath Add? *)
-(*
-type Message.t += Add_Database
-type Message.t += Add_Migration
-type Message.t += Add_View
-type Message.t += Add_Job
-type Message.t += Add_Route
-*)
 type Message.t += Start
 type Message.t += Migrate
 
 (*
 Probably need to create separate modules for each of the four main action types (Init, Add, Start, Migrate)
+ *)
+(*
+let init_project name =
+  print_endline ("Creating project \"" ^ name ^ "\"...");
+  try
+    (* Attempt to create a directory with the project name *)
+    mkdir name 0o755; (* 0o755 sets the directory permissions to rwxr-xr-x *)
+    print_endline ("Project \"" ^ name ^ "\" created successfully.");
+  with
+  | Unix_error (EEXIST, _, _) -> 
+      print_endline ("A project named \"" ^ name ^ "\" already exists.");
+  | e -> 
+      print_endline ("An error occurred: " ^ (Printexc.to_string e))
+*)
 
-This really isn't the desired flow, since this is all directly in a Riot process, and realistically we want to
-start Mint Tea and check which action the user is trying to perform. Then, Mint Tea can invoke main methods
-for each of the actions to spin up separate Riot processes to handle these tasks. 
+let init_project name =
+  print_endline ("Creating project \"" ^ name ^ "\" with Dune...");
+  let command = "dune init proj " ^ name in
+  match Sys.command command with
+  | 0 -> print_endline ("Project \"" ^ name ^ "\" created successfully.")
+  | _ -> print_endline ("Failed to create project \"" ^ name ^ "\". Please make sure Dune is installed and try again.")
 
-This is especially true for the start command, since it will spawn processes that are long-living to support
-the entire app (database handlers, web server, job queue, etc)
+(*
+  start_project needs to accept a --dev flag, so that it can start a Riot process for TailwindCSS
  *)
 
-(*let rec handler () =*)
 let handler () =
   (match receive () with
   | Usage_info -> Printf.printf "Usage: %s [init|start|add|migrate] args...\n" Sys.argv.(0)
-  | Init project_name -> print_endline ("Creating project \"" ^ project_name ^ "\"...")
+  | Init project_name -> init_project project_name
   | Add -> print_endline "Hello Add"
   | Start -> print_endline "Hello Start"
   | Migrate -> print_endline "Hello Migrate"
   | _ -> print_endline "It turns out that not every piece fits in the puzzle D:")
-(*  handler ()*)
 
 let () = 
         Riot.run @@ fun () ->
@@ -44,8 +53,11 @@ let () =
                 (
                 match command with
                 | "init" -> (
-                        if Array.length Sys.argv != 3 then Printf.printf "Usage: %s init [project-name]" Sys.argv.(0)
-                        else send pid (Init Sys.argv.(2))
+                  if Array.length Sys.argv != 3 then (
+                    Printf.printf "Usage: %s init [project-name] \n" Sys.argv.(0);
+                    shutdown ()
+                  )
+                  else send pid (Init Sys.argv.(2))
                 )
                 | "start" -> send pid Start
                 | "add" -> send pid Add
