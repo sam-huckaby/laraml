@@ -1,0 +1,4 @@
+(executable
+  (name mosaic)
+  (public_name mosaic)
+  (libraries minttea leaves spices riot))

@@ -42,6 +42,10 @@ let feed_page request =
       (Layout.standard request (Layout.feed request))
   ) |> Lwt.return
 *)
+
+(* Use file structure for pages, using possible dune file example here: *)
+(* https://stackoverflow.com/questions/67462284/how-to-have-nested-libraries-confused-about-dune-etc *)
+
 let pages = [
   (* A simple no authentication route *)
   Dream.scope "/" [(* Middleware goes here *)] [
