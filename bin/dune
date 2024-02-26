@@ -1,5 +1,5 @@
 (executable
  (public_name laraml)
  (name main)
- (libraries laraml dotenv yojson dream tyxml core)
+ (libraries laraml dotenv yojson tyxml riot core)
  (preprocess (pps lwt_ppx)))

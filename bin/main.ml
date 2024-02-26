@@ -54,5 +54,63 @@ let auth_middleware next request =
           next request
 *)
 
-let () = Core.Bootstrap.launch ();
+(*let () = Core.Bootstrap.launch ();*)
+
+open Riot
+(*open Tyxml*)
+open Tyxml_html
+
+(*let build_page html_obj = Format.asprintf "%a" (Html.pp ()) html_obj*)
+let compile_elt elt = Format.asprintf "%a" (Tyxml.Html.pp_elt ()) elt
+(*let compile_elt_list elt = List.fold_left (fun acc s -> acc ^ s) "" (List.map (fun x -> Format.asprintf "%a" (Tyxml.Html.pp_elt ()) x) elt)*)
+
+module Echo_server = struct
+  include Trail.Sock.Default
+
+  type args = unit
+  type state = int
+
+  let init _args = `ok 0
+
+  let handle_frame frame _conn state =
+    Logger.info (fun f -> f "handling frame: %a" Trail.Frame.pp frame);
+    `push ([ frame ], state)
+end
+
+let trail =
+  let open Trail in
+  let open Router in
+  let demo_page = Bytestring.of_string (compile_elt (div ~a:[a_class ["bold"]] [ txt "beep" ])) in
+  [
+    use (module Logger) Logger.(args ~level:Debug ());
+    router
+      [
+        get "/" (fun conn -> Conn.send_response `OK {%b|demo_page|} conn);
+        socket "/ws" (module Echo_server) ();
+        scope "/api"
+          [
+            get "/version" (fun conn ->
+                Conn.send_response `OK {%b|"none"|} conn);
+            scope "/test" [
+              get "/version" (fun conn ->
+                  Conn.send_response `OK {%b|"none"|} conn);
+              get "/version" (fun conn ->
+                  Conn.send_response `OK {%b|"none"|} conn);
+            ]
+          ];
+      ];
+  ]
+
+[@@@warning "-8"]
+
+let () =
+  Riot.run @@ fun () ->
+  Logger.set_log_level (Some Info);
+  let (Ok _) = Logger.start () in
+  sleep 0.1;
+  let port = 2118 in
+  let handler = Nomad.trail trail in
+  let (Ok pid) = Nomad.start_link ~port ~handler () in
+  Logger.info (fun f -> f "Listening on 0.0.0.0:%d" port);
+  wait_pids [ pid ]
 

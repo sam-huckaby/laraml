@@ -1,5 +1,6 @@
 # Don't track build artifacts
 _build
+_opam
 
 # Definitely don't track hidden environment files
 .env
